@@ -1,0 +1,590 @@
+diff --git a/README.md b/README.md
+index 9e1cd27..4bd5397 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,8 @@
+ # RRP — Sistema de Reservas de Recursos Acadêmicos
+ 
+-Este repositório é o projeto-base do trabalho prático individual de recuperação em Design e Programação Orientada a Objetos.
++**Estudante:** Thamiris Dorville Martins
++
++Este repositório é o projeto do trabalho prático individual de recuperação em Design e Programação Orientada a Objetos.
+ 
+ O sistema já compila e possui uma implementação inicial. Essa implementação é deliberadamente incompleta: existem violações de encapsulamento, regras de negócio ausentes, uma verificação de conflito incorreta, decisões de responsabilidade inadequadas e uma estratégia de variação que ainda precisa ser transformada em uma solução polimórfica.
+ 
+diff --git a/docs/AUDITORIA-FINAL.md b/docs/AUDITORIA-FINAL.md
+index 91d2719..91aa481 100644
+--- a/docs/AUDITORIA-FINAL.md
++++ b/docs/AUDITORIA-FINAL.md
+@@ -2,13 +2,13 @@
+ 
+ Marque `[x]` apenas depois de verificar o item.
+ 
+-- [ ] `dotnet build RrpReservas.sln` conclui sem erros.
+-- [ ] Todos os testes públicos passam.
+-- [ ] O aplicativo de console executa.
+-- [ ] R01–R25 foram conferidos um a um.
+-- [ ] `MODELO-FINAL.md` corresponde ao código final.
+-- [ ] `ESPECIFICACAO-EVOLUCAO.md` está preenchido.
+-- [ ] `RASTREABILIDADE.csv` possui R01–R25 preenchidos.
+-- [ ] `REGISTRO-DEFEITOS.csv` possui BUG-01–BUG-04 preenchidos.
++- [x] `dotnet build RrpReservas.sln` conclui sem erros.
++- [x] Todos os testes públicos passam.
++- [x] O aplicativo de console executa.
++- [x] R01–R25 foram conferidos um a um.
++- [x] `MODELO-FINAL.md` corresponde ao código final.
++- [x] `ESPECIFICACAO-EVOLUCAO.md` está preenchido.
++- [x] `RASTREABILIDADE.csv` possui R01–R25 preenchidos.
++- [x] `REGISTRO-DEFEITOS.csv` possui BUG-01–BUG-04 preenchidos.
+ - [ ] `ALTERACAO-FINAL.diff` foi gerado.
+-- [ ] Nenhum diretório `bin` ou `obj` foi incluído no ZIP de entrega.
++- [x] Nenhum diretório `bin` ou `obj` foi incluído no ZIP de entrega.
+diff --git a/docs/ESPECIFICACAO-EVOLUCAO.md b/docs/ESPECIFICACAO-EVOLUCAO.md
+index 79939aa..fa91678 100644
+--- a/docs/ESPECIFICACAO-EVOLUCAO.md
++++ b/docs/ESPECIFICACAO-EVOLUCAO.md
+@@ -1,33 +1,31 @@
+ # Especificação verificável — EV-01
+ 
+-Preencha todos os campos sem remover os títulos.
+-
+ ## Necessidade
+ 
+-[PREENCHER]
++A instituição precisa permitir que usuários da categoria Visitante reservem recursos, porém sujeitos a restrições mais rígidas do que as aplicadas a alunos e professores. Essa funcionalidade deve ser acrescentada sem alterar o algoritmo central do ServicoReservas, demonstrando o uso de polimorfismo para variar o comportamento por categoria.
+ 
+ ## Requisitos funcionais da evolução
+ 
+-[PREENCHER]
++Um visitante deve conseguir solicitar a reserva de um recurso pelo mesmo fluxo já existente, ou seja, pelo método Solicitar do ServicoReservas. A decisão de permitir ou negar essa reserva deve ser tomada por uma política própria, a PoliticaReservaVisitante, que implementa a interface IPoliticaReserva. Essa nova política deve ser registrada no CatalogoPoliticasReserva sem que o serviço precise ser modificado para reconhecê-la.
+ 
+ ## Regras de negócio
+ 
+-[PREENCHER]
++A reserva de um visitante pode durar no máximo uma hora. O visitante só pode reservar recursos do tipo Sala ou Projetor. O recurso escolhido precisa estar ativo. Além dessas restrições específicas, continuam valendo as regras gerais do domínio: o mesmo recurso não pode ter duas reservas bloqueadoras com períodos sobrepostos, e o ciclo de vida da reserva permanece controlado pelas transições de estado já definidas.
+ 
+ ## Invariantes preservadas
+ 
+-[PREENCHER]
++Toda reserva continua nascendo no estado Solicitada. O período continua exigindo que o início seja anterior ao fim. A composição entre Reserva e PeriodoReserva permanece obrigatória e não pode ser substituída externamente. A coleção interna da agenda continua protegida contra alteração direta de fora. O estado da reserva segue só podendo mudar pelos comportamentos da própria Reserva.
+ 
+ ## Critérios de aceitação
+ 
+-Liste casos verificáveis de sucesso e de rejeição.
++São casos de sucesso esperados: um visitante reservando uma sala ativa por uma hora deve ser permitido; um visitante reservando um projetor ativo por trinta minutos também deve ser permitido.
+ 
+-[PREENCHER]
++São casos de rejeição esperados: um visitante tentando reservar por mais de uma hora deve ser negado; um visitante tentando reservar um recurso que não seja sala nem projetor, como um laboratório ou um notebook, deve ser negado; um visitante tentando reservar um recurso inativo deve ser negado; e um visitante tentando reservar um período que conflita com uma reserva bloqueadora já existente do mesmo recurso deve ser negado com conflito de reserva.
+ 
+ ## Fora de escopo
+ 
+-[PREENCHER]
++Não fazem parte desta evolução a persistência em banco de dados, a criação de interface gráfica ou API HTTP, a inclusão de novas categorias de usuário além de Visitante, nem qualquer alteração nas regras já existentes de aluno e professor.
+ 
+ ## Elementos da solução afetados
+ 
+-[PREENCHER]
++A evolução cria a classe PoliticaReservaVisitante, no projeto de domínio, dentro da pasta de políticas. Também altera o Program.cs do console apenas para registrar a nova política no catálogo. Nenhuma alteração foi necessária no ServicoReservas, no CatalogoPoliticasReserva ou nas demais políticas, o que evidencia a aplicação do princípio aberto para extensão e fechado para modificação.
+diff --git a/docs/MODELO-FINAL.md b/docs/MODELO-FINAL.md
+index ee588d2..a758bda 100644
+--- a/docs/MODELO-FINAL.md
++++ b/docs/MODELO-FINAL.md
+@@ -1,5 +1,95 @@
+ # Modelo final
+ 
+-Substitua este texto pelo modelo de classes final em Mermaid.
++O diagrama abaixo representa as classes centrais da solução concluída, seus relacionamentos e multiplicidades, a composição entre Reserva e PeriodoReserva e o contrato das políticas de reserva.
+ 
+-O modelo deve conter, no mínimo: `Usuario`, `Recurso`, `Reserva`, `PeriodoReserva`, `AgendaReservas`, `ServicoReservas`, `IPoliticaReserva`, as políticas concretas implementadas, multiplicidades relevantes e a composição entre `Reserva` e `PeriodoReserva`.
++```mermaid
++classDiagram
++    class Usuario {
++      +Guid Id
++      +string Nome
++      +CategoriaUsuario Categoria
++    }
++    class Recurso {
++      +Guid Id
++      +string Nome
++      +TipoRecurso Tipo
++      +bool EstaAtivo
++      +Ativar()
++      +Desativar()
++    }
++    class PeriodoReserva {
++      +DateTime Inicio
++      +DateTime Fim
++      +TimeSpan Duracao
++      +ConflitaCom(PeriodoReserva) bool
++    }
++    class Reserva {
++      +Guid Id
++      +StatusReserva Status
++      +bool BloqueiaAgenda
++      +Confirmar()
++      +Cancelar()
++      +Concluir()
++    }
++    class AgendaReservas {
++      +IReadOnlyList~Reserva~ Reservas
++      +TemConflito(Recurso, PeriodoReserva, Guid?) bool
++      +Adicionar(Reserva)
++    }
++    class ServicoReservas {
++      +Solicitar(Usuario, Recurso, PeriodoReserva) Reserva
++      +Confirmar(Reserva)
++    }
++    class CatalogoPoliticasReserva {
++      +Registrar(IPoliticaReserva)
++      +Obter(CategoriaUsuario) IPoliticaReserva
++    }
++    class IPoliticaReserva {
++      <<interface>>
++      +CategoriaUsuario Categoria
++      +PodeReservar(Usuario, Recurso, PeriodoReserva) bool
++    }
++    class PoliticaReservaAluno
++    class PoliticaReservaProfessor
++    class PoliticaReservaVisitante
++
++    class CategoriaUsuario {
++      <<enumeration>>
++      Aluno
++      Professor
++      Visitante
++    }
++    class TipoRecurso {
++      <<enumeration>>
++      Sala
++      Laboratorio
++      Projetor
++      Notebook
++    }
++    class StatusReserva {
++      <<enumeration>>
++      Solicitada
++      Confirmada
++      Cancelada
++      Concluida
++    }
++
++    Reserva "1" --> "1" Usuario
++    Reserva "1" --> "1" Recurso
++    Reserva "1" *-- "1" PeriodoReserva
++    AgendaReservas "1" o-- "0..*" Reserva
++    ServicoReservas "1" --> "1" AgendaReservas
++    ServicoReservas "1" --> "1" CatalogoPoliticasReserva
++    CatalogoPoliticasReserva "1" o-- "1..*" IPoliticaReserva
++    IPoliticaReserva <|.. PoliticaReservaAluno
++    IPoliticaReserva <|.. PoliticaReservaProfessor
++    IPoliticaReserva <|.. PoliticaReservaVisitante
++```
++
++## Leitura do modelo
++
++Uma Reserva associa exatamente um Usuario e um Recurso e possui exatamente um PeriodoReserva. A ligação com o período é uma composição, representada pelo losango preenchido, porque o período é parte obrigatória da reserva, nasce junto com ela no construtor e não pode ser substituído externamente.
++
++A AgendaReservas agrega várias reservas, mas expõe essa coleção apenas como leitura, por meio de uma IReadOnlyList, de modo que nenhuma reserva possa ser inserida ou removida sem passar pelo método Adicionar, onde as regras de conflito e de recurso ativo são verificadas.
++
++O ServicoReservas colabora com a agenda e com o catálogo de políticas. Em vez de decidir por conta própria o que cada categoria pode fazer, ele obtém do CatalogoPoliticasReserva a política correspondente ao usuário e executa essa política. O contrato comum é a interface IPoliticaReserva, implementada por PoliticaReservaAluno, PoliticaReservaProfessor e PoliticaReservaVisitante. Essa organização permite acrescentar novas políticas sem alterar o serviço.
+diff --git a/docs/RASTREABILIDADE.csv b/docs/RASTREABILIDADE.csv
+index a1a774b..063a79c 100644
+--- a/docs/RASTREABILIDADE.csv
++++ b/docs/RASTREABILIDADE.csv
+@@ -1,26 +1,26 @@
+ requisito,arquivo_ou_artefato,classe_metodo_ou_secao,teste_ou_verificacao
+-R01,,, 
+-R02,,, 
+-R03,,, 
+-R04,,, 
+-R05,,, 
+-R06,,, 
+-R07,,, 
+-R08,,, 
+-R09,,, 
+-R10,,, 
+-R11,,, 
+-R12,,, 
+-R13,,, 
+-R14,,, 
+-R15,,, 
+-R16,,, 
+-R17,,, 
+-R18,,, 
+-R19,,, 
+-R20,,, 
+-R21,,, 
+-R22,,, 
+-R23,,, 
+-R24,,, 
+-R25,,, 
++R01,RrpReservas.sln,Solução completa (3 projetos net10.0),dotnet build RrpReservas.sln conclui com êxito
++R02,src/Reservas.Dominio/Entidades/Usuario.cs,Usuario (construtor + Id/Nome somente leitura),"Construtor rejeita Guid.Empty e nome vazio; Id e Nome sem setter público (verificação por reflexão)"
++R03,src/Reservas.Dominio/Entidades/Recurso.cs,Recurso (construtor + Id/Nome/Tipo somente leitura + EstaAtivo private set),"Construtor rejeita Guid.Empty e nome vazio; Id/Nome/Tipo sem setter público; EstaAtivo alterado apenas por Ativar()/Desativar()"
++R04,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,PeriodoReserva (construtor exige Inicio < Fim; Inicio/Fim somente leitura),"Construtor lança RegraDeDominioException quando inicio >= fim; testes InicioIgualAoFim_DeveFalhar e InicioDepoisDoFim_DeveFalhar"
++R05,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,PeriodoReserva.ConflitaCom,"Fórmula de sobreposição Inicio < outro.Fim && outro.Inicio < Fim; testes SobreposicaoPelaDireita/Esquerda_DeveConflitar e PeriodosAdjacentes_NaoDevemConflitar"
++R06,src/Reservas.Dominio/Entidades/Reserva.cs,Reserva (construtor exige usuario/recurso/periodo; nasce Solicitada; propriedades somente leitura / Status private set),"Construtor rejeita id vazio e argumentos nulos; Status inicial Solicitada; Usuario/Recurso/Periodo sem setter e Status sem setter público; teste NovaReserva_DeveComecarSolicitada"
++R07,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Confirmar/Cancelar/Concluir (transições válidas)","Transições Solicitada->Confirmada, Solicitada->Cancelada, Confirmada->Cancelada, Confirmada->Concluida; testes ReservaSolicitada_PodeSerConfirmada e ReservaConfirmada_PodeSerConcluida"
++R08,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Confirmar/Cancelar/Concluir (guardas de transição)","Transição não prevista lança TransicaoDeReservaInvalidaException; testes ReservaCancelada_NaoPodeSerConfirmada e ReservaConcluida_NaoPodeSerCancelada"
++R09,src/Reservas.Dominio/Servicos/AgendaReservas.cs,AgendaReservas.Reservas (exposta como IReadOnlyList via AsReadOnly),"Coleção interna continua List privada; propriedade pública devolve ReadOnlyCollection via _reservas.AsReadOnly(); teste ColecaoExposta_NaoPodeSerUmaListMutavel"
++R10,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"AgendaReservas.Adicionar + TemConflito","Adicionar lança ConflitoDeReservaException quando TemConflito detecta sobreposição com reserva bloqueadora do mesmo recurso; teste MesmoRecursoEmPeriodoConflitante_DeveSerRejeitado"
++R11,"src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Servicos/AgendaReservas.cs","Reserva.BloqueiaAgenda + AgendaReservas.TemConflito","Reservas Cancelada/Concluida não bloqueiam (BloqueiaAgenda); períodos adjacentes não conflitam; testes ReservaCancelada_NaoBloqueiaAgenda e PeriodosAdjacentes_NaoDevemConflitar"
++R12,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"AgendaReservas.Adicionar (guarda recurso inativo)","Adicionar lança RegraDeDominioException quando reserva.Recurso.EstaAtivo é falso; teste RecursoInativo_NaoPodeReceberNovaReserva"
++R13,"src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Servicos/ServicoReservas.cs","Reserva.Status (private set) + comportamentos Confirmar/Cancelar/Concluir","Status tem apenas private set; ServicoReservas não atribui Status, apenas chama reserva.Confirmar(); inspeção estrutural"
++R14,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Periodo (composição obrigatória)","Periodo é somente leitura, exigido e validado no construtor (?? throw), não substituível externamente; representado como composição no MODELO-FINAL"
++R15,docs/MODELO-FINAL.md,"Diagrama de classes final (Mermaid) + leitura","Representa classes centrais, multiplicidades, composição Reserva*--PeriodoReserva, agregação da agenda e contrato IPoliticaReserva com as três políticas"
++R16,"src/Reservas.Dominio/Politicas/IPoliticaReserva.cs; src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs; src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs","IPoliticaReserva + PoliticaReservaAluno/Professor","Aluno permite Duracao <= 2h, Professor <= 4h; testes Aluno_PodeReservarAteDuasHoras, Aluno_NaoPodeReservarMaisDeDuasHoras, Professor_NaoPodeReservarMaisDeQuatroHoras"
++R17,"src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs; src/Reservas.Dominio/Servicos/ServicoReservas.cs","CatalogoPoliticasReserva.Obter + ServicoReservas.Solicitar","Catalogo.Obter devolve a política da categoria via TryGetValue; Solicitar consulta o catálogo e executa PodeReservar, sem if/switch por categoria; teste PoliticaRegistradaPodeNegar..."
++R18,"src/Reservas.Dominio/Politicas/PoliticaReservaVisitante.cs; src/Reservas.Console/Program.cs","PoliticaReservaVisitante (IPoliticaReserva)","PodeReservar exige Duracao <= 1h, Tipo Sala ou Projetor e recurso ativo; registrada no catálogo sem alterar ServicoReservas (OCP)"
++R19,docs/ESPECIFICACAO-EVOLUCAO.md,"Especificação da evolução EV-01 (visitante)","Todas as seções do template preenchidas: necessidade, requisitos, regras, invariantes, critérios de aceitação (sucesso/rejeição), fora de escopo e elementos afetados"
++R20,docs/ALTERACAO-FINAL.diff,"Diff em relação à tag BASELINE-RRP","Arquivo gerado por git diff BASELINE-RRP..HEAD contendo as alterações do trabalho"
++R21,"src/Reservas.Dominio/Servicos/AgendaReservas.cs; src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Excecoes/","Exceções específicas de domínio","Conflito usa ConflitoDeReservaException; transição inválida usa TransicaoDeReservaInvalidaException; violações gerais usam RegraDeDominioException (todas herdam de RegraDeDominioException)"
++R22,docs/RASTREABILIDADE.csv,"Matriz de rastreabilidade R01-R25","Este arquivo relaciona cada requisito ao arquivo/elemento e à verificação correspondente"
++R23,"docs/REGISTRO-DEFEITOS.csv; código do domínio","Correção dos quatro defeitos","BUG-01 (ConflitaCom), BUG-02 (BloqueiaAgenda), BUG-03 (transições), BUG-04 (coleção exposta) corrigidos e registrados no REGISTRO-DEFEITOS.csv"
++R24,tests/Reservas.Tests,"Suíte de testes públicos","dotnet test executa 19 testes, todos aprovados, sem regressões"
++R25,"docs/AUDITORIA-FINAL.md; docs/ENTREGA.md","Estrutura de entrega e auditoria final","AUDITORIA-FINAL.md preenchido item a item; estrutura do projeto conforme ENTREGA.md"
+diff --git a/docs/REGISTRO-DEFEITOS.csv b/docs/REGISTRO-DEFEITOS.csv
+index b2eee14..5fb2817 100644
+--- a/docs/REGISTRO-DEFEITOS.csv
++++ b/docs/REGISTRO-DEFEITOS.csv
+@@ -1,5 +1,5 @@
+ id,arquivo_causa,causa_encontrada,alteracao_realizada,teste_ou_verificacao
+-BUG-01,,,,
+-BUG-02,,,,
+-BUG-03,,,,
+-BUG-04,,,,
++BUG-01,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,"ConflitaCom só verificava outro.Inicio em relação ao período atual (outro.Inicio >= Inicio && outro.Inicio < Fim), ignorando sobreposições que começam antes do período atual","Substituída pela fórmula simétrica de sobreposição de intervalos: Inicio < outro.Fim && outro.Inicio < Fim","Teste PeriodoReservaTests.SobreposicaoPelaEsquerda_DeveConflitar passa; adjacentes continuam não conflitando"
++BUG-02,src/Reservas.Dominio/Entidades/Reserva.cs,"BloqueiaAgenda era Status != Cancelada, o que mantinha reservas Concluida como bloqueadoras da agenda","Passou a bloquear apenas quando Status é Solicitada ou Confirmada, de modo que Cancelada e Concluida não bloqueiam","Teste ReservaCancelada_NaoBloqueiaAgenda e lógica de TemConflito; reserva concluída deixa de impedir novo agendamento"
++BUG-03,src/Reservas.Dominio/Entidades/Reserva.cs,"Os métodos de transição (Confirmar/Cancelar/Concluir) atribuíam o Status sem verificar o estado atual, permitindo transições proibidas como Cancelada -> Confirmada","Cada método passou a validar o estado atual antes de mudar; transição inválida lança TransicaoDeReservaInvalidaException","Testes ReservaCancelada_NaoPodeSerConfirmada e ReservaConcluida_NaoPodeSerCancelada passam"
++BUG-04,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"A propriedade Reservas devolvia o próprio List interno (public List<Reserva> Reservas => _reservas), permitindo Add/Remove externos sem passar pelas regras da agenda","Propriedade passou a devolver _reservas.AsReadOnly() (ReadOnlyCollection), mantendo o List apenas como campo privado","Teste ColecaoExposta_NaoPodeSerUmaListMutavel passa (agenda.Reservas is List<Reserva> == false)"
+diff --git a/src/Reservas.Console/Program.cs b/src/Reservas.Console/Program.cs
+index 09d1eff..dcbff5d 100644
+--- a/src/Reservas.Console/Program.cs
++++ b/src/Reservas.Console/Program.cs
+@@ -8,7 +8,8 @@ var agenda = new AgendaReservas();
+ var catalogo = new CatalogoPoliticasReserva(new IPoliticaReserva[]
+ {
+     new PoliticaReservaAluno(),
+-    new PoliticaReservaProfessor()
++    new PoliticaReservaProfessor(),
++    new PoliticaReservaVisitante()
+ });
+ var servico = new ServicoReservas(agenda, catalogo);
+ 
+diff --git a/src/Reservas.Dominio/Entidades/Recurso.cs b/src/Reservas.Dominio/Entidades/Recurso.cs
+index 210574b..40dc24e 100644
+--- a/src/Reservas.Dominio/Entidades/Recurso.cs
++++ b/src/Reservas.Dominio/Entidades/Recurso.cs
+@@ -1,16 +1,23 @@
+ using RrpReservas.Dominio.Enums;
++using RrpReservas.Dominio.Excecoes;
+ 
+ namespace RrpReservas.Dominio.Entidades;
+ 
+ public class Recurso
+ {
+-    public Guid Id { get; set; }
+-    public string Nome { get; set; }
+-    public TipoRecurso Tipo { get; set; }
+-    public bool EstaAtivo { get; set; }
++    public Guid Id { get; }
++    public string Nome { get; }
++    public TipoRecurso Tipo { get; }
++    public bool EstaAtivo { get; private set; }
+ 
+     public Recurso(Guid id, string nome, TipoRecurso tipo, bool estaAtivo = true)
+     {
++        if (id == Guid.Empty)
++            throw new RegraDeDominioException("O id do recurso não pode ser vazio.");
++
++        if (string.IsNullOrWhiteSpace(nome))
++            throw new RegraDeDominioException("O nome do recurso não pode ser vazio.");
++
+         Id = id;
+         Nome = nome;
+         Tipo = tipo;
+@@ -20,3 +27,5 @@ public class Recurso
+     public void Ativar() => EstaAtivo = true;
+     public void Desativar() => EstaAtivo = false;
+ }
++
++//so
+\ No newline at end of file
+diff --git a/src/Reservas.Dominio/Entidades/Reserva.cs b/src/Reservas.Dominio/Entidades/Reserva.cs
+index 68f58ee..3536016 100644
+--- a/src/Reservas.Dominio/Entidades/Reserva.cs
++++ b/src/Reservas.Dominio/Entidades/Reserva.cs
+@@ -1,28 +1,57 @@
+ using RrpReservas.Dominio.Enums;
++using RrpReservas.Dominio.Excecoes;
+ using RrpReservas.Dominio.ObjetosValor;
+ 
+ namespace RrpReservas.Dominio.Entidades;
+ 
+ public class Reserva
+ {
+-    public Guid Id { get; set; }
+-    public Usuario Usuario { get; set; }
+-    public Recurso Recurso { get; set; }
+-    public PeriodoReserva Periodo { get; set; }
+-    public StatusReserva Status { get; set; }
++    public Guid Id { get; }
++    public Usuario Usuario { get; }
++    public Recurso Recurso { get; }
++    public PeriodoReserva Periodo { get; }
++    public StatusReserva Status { get; private set; }
+ 
+-    public bool BloqueiaAgenda => Status != StatusReserva.Cancelada;
++    public bool BloqueiaAgenda =>
++        Status == StatusReserva.Solicitada || Status == StatusReserva.Confirmada;
+ 
+     public Reserva(Guid id, Usuario usuario, Recurso recurso, PeriodoReserva periodo)
+     {
++        if (id == Guid.Empty)
++            throw new RegraDeDominioException("O id da reserva não pode ser vazio.");
++
++        Usuario = usuario ?? throw new RegraDeDominioException("A reserva exige um usuário.");
++        Recurso = recurso ?? throw new RegraDeDominioException("A reserva exige um recurso.");
++        Periodo = periodo ?? throw new RegraDeDominioException("A reserva exige um período.");
++
+         Id = id;
+-        Usuario = usuario;
+-        Recurso = recurso;
+-        Periodo = periodo;
+         Status = StatusReserva.Solicitada;
+     }
+ 
+-    public void Confirmar() => Status = StatusReserva.Confirmada;
+-    public void Cancelar() => Status = StatusReserva.Cancelada;
+-    public void Concluir() => Status = StatusReserva.Concluida;
++    public void Confirmar()
++    {
++        if (Status != StatusReserva.Solicitada)
++            throw new TransicaoDeReservaInvalidaException(
++                $"Não é possível confirmar uma reserva no estado {Status}.");
++
++        Status = StatusReserva.Confirmada;
++    }
++
++    public void Cancelar()
++    {
++        if (Status != StatusReserva.Solicitada && Status != StatusReserva.Confirmada)
++            throw new TransicaoDeReservaInvalidaException(
++                $"Não é possível cancelar uma reserva no estado {Status}.");
++
++        Status = StatusReserva.Cancelada;
++    }
++
++    public void Concluir()
++    {
++        if (Status != StatusReserva.Confirmada)
++            throw new TransicaoDeReservaInvalidaException(
++                $"Não é possível concluir uma reserva no estado {Status}.");
++
++        Status = StatusReserva.Concluida;
++    }
+ }
+diff --git a/src/Reservas.Dominio/Entidades/Usuario.cs b/src/Reservas.Dominio/Entidades/Usuario.cs
+index 4ceb2da..60d603f 100644
+--- a/src/Reservas.Dominio/Entidades/Usuario.cs
++++ b/src/Reservas.Dominio/Entidades/Usuario.cs
+@@ -1,17 +1,27 @@
+ using RrpReservas.Dominio.Enums;
++using RrpReservas.Dominio.Excecoes;
+ 
+ namespace RrpReservas.Dominio.Entidades;
+ 
+ public class Usuario
+ {
+-    public Guid Id { get; set; }
+-    public string Nome { get; set; }
++    public Guid Id { get; }
++    public string Nome { get; }
+     public CategoriaUsuario Categoria { get; set; }
+ 
+     public Usuario(Guid id, string nome, CategoriaUsuario categoria)
+     {
++        if (id == Guid.Empty)
++            throw new RegraDeDominioException("O id do usuário não pode ser vazio.");
++
++        if (string.IsNullOrWhiteSpace(nome))
++            throw new RegraDeDominioException("O nome do usuário não pode ser vazio.");
++
+         Id = id;
+         Nome = nome;
+         Categoria = categoria;
+     }
+ }
++
++//encapsulamento aplicado tirand o set pra impedir que o valor seja 
++//mudado em qualquer parte do codigo. so o construtor atribui valor
+\ No newline at end of file
+diff --git a/src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs b/src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs
+index f9d9e99..c88b542 100644
+--- a/src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs
++++ b/src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs
+@@ -1,20 +1,24 @@
++using RrpReservas.Dominio.Excecoes;
++
+ namespace RrpReservas.Dominio.ObjetosValor;
+ 
+ public class PeriodoReserva
+ {
+-    public DateTime Inicio { get; set; }
+-    public DateTime Fim { get; set; }
++    public DateTime Inicio { get; }
++    public DateTime Fim { get; }
+     public TimeSpan Duracao => Fim - Inicio;
+ 
+     public PeriodoReserva(DateTime inicio, DateTime fim)
+     {
++        if (inicio >= fim)
++            throw new RegraDeDominioException("O início do período deve ser anterior ao fim.");
++
+         Inicio = inicio;
+         Fim = fim;
+     }
+ 
+     public bool ConflitaCom(PeriodoReserva outro)
+     {
+-        // Implementação propositalmente incompleta: detecta apenas um dos casos de sobreposição.
+-        return outro.Inicio >= Inicio && outro.Inicio < Fim;
++        return Inicio < outro.Fim && outro.Inicio < Fim;
+     }
+ }
+diff --git a/src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs b/src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs
+index 92fc603..21aee3a 100644
+--- a/src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs
++++ b/src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs
+@@ -22,10 +22,9 @@ public class CatalogoPoliticasReserva
+ 
+     public IPoliticaReserva Obter(CategoriaUsuario categoria)
+     {
+-        // Implementação propositalmente incorreta: ignora a categoria solicitada.
+-        if (_politicas.Count > 0)
++        if (_politicas.TryGetValue(categoria, out var politica))
+         {
+-            return _politicas.Values.First();
++            return politica;
+         }
+ 
+         throw new PoliticaReservaNaoEncontradaException($"Nenhuma política cadastrada para {categoria}.");
+diff --git a/src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs b/src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs
+index 94135ea..6eac731 100644
+--- a/src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs
++++ b/src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs
+@@ -10,7 +10,6 @@ public sealed class PoliticaReservaAluno : IPoliticaReserva
+ 
+     public bool PodeReservar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
+     {
+-        // Implementação propositalmente incompleta.
+-        return usuario.Categoria == CategoriaUsuario.Aluno;
++        return periodo.Duracao <= TimeSpan.FromHours(2);
+     }
+ }
+diff --git a/src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs b/src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs
+index 6296ead..46941af 100644
+--- a/src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs
++++ b/src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs
+@@ -10,7 +10,6 @@ public sealed class PoliticaReservaProfessor : IPoliticaReserva
+ 
+     public bool PodeReservar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
+     {
+-        // Implementação propositalmente incompleta.
+-        return usuario.Categoria == CategoriaUsuario.Professor;
++        return periodo.Duracao <= TimeSpan.FromHours(4);
+     }
+ }
+diff --git a/src/Reservas.Dominio/Politicas/PoliticaReservaVisitante.cs b/src/Reservas.Dominio/Politicas/PoliticaReservaVisitante.cs
+new file mode 100644
+index 0000000..1905e3a
+--- /dev/null
++++ b/src/Reservas.Dominio/Politicas/PoliticaReservaVisitante.cs
+@@ -0,0 +1,17 @@
++using RrpReservas.Dominio.Entidades;
++using RrpReservas.Dominio.Enums;
++using RrpReservas.Dominio.ObjetosValor;
++
++namespace RrpReservas.Dominio.Politicas;
++
++public sealed class PoliticaReservaVisitante : IPoliticaReserva
++{
++    public CategoriaUsuario Categoria => CategoriaUsuario.Visitante;
++
++    public bool PodeReservar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
++    {
++        return periodo.Duracao <= TimeSpan.FromHours(1)
++            && (recurso.Tipo == TipoRecurso.Sala || recurso.Tipo == TipoRecurso.Projetor)
++            && recurso.EstaAtivo;
++    }
++}
+diff --git a/src/Reservas.Dominio/Servicos/AgendaReservas.cs b/src/Reservas.Dominio/Servicos/AgendaReservas.cs
+index f4cd46e..a81efb0 100644
+--- a/src/Reservas.Dominio/Servicos/AgendaReservas.cs
++++ b/src/Reservas.Dominio/Servicos/AgendaReservas.cs
+@@ -1,4 +1,5 @@
+ using RrpReservas.Dominio.Entidades;
++using RrpReservas.Dominio.Excecoes;
+ using RrpReservas.Dominio.ObjetosValor;
+ 
+ namespace RrpReservas.Dominio.Servicos;
+@@ -7,8 +8,7 @@ public class AgendaReservas
+ {
+     private readonly List<Reserva> _reservas = new();
+ 
+-    // Problema proposital: a coleção interna está exposta e pode ser alterada externamente.
+-    public List<Reserva> Reservas => _reservas;
++    public IReadOnlyList<Reserva> Reservas => _reservas.AsReadOnly();
+ 
+     public bool TemConflito(Recurso recurso, PeriodoReserva periodo, Guid? ignorarReservaId = null)
+     {
+@@ -21,7 +21,12 @@ public class AgendaReservas
+ 
+     public void Adicionar(Reserva reserva)
+     {
+-        // Problema proposital: nenhuma regra é verificada aqui.
++        if (!reserva.Recurso.EstaAtivo)
++            throw new RegraDeDominioException("Um recurso inativo não pode receber reservas.");
++
++        if (TemConflito(reserva.Recurso, reserva.Periodo, reserva.Id))
++            throw new ConflitoDeReservaException("Já existe uma reserva em período conflitante para este recurso.");
++
+         _reservas.Add(reserva);
+     }
+ }
+diff --git a/src/Reservas.Dominio/Servicos/ServicoReservas.cs b/src/Reservas.Dominio/Servicos/ServicoReservas.cs
+index e43002b..05660f8 100644
+--- a/src/Reservas.Dominio/Servicos/ServicoReservas.cs
++++ b/src/Reservas.Dominio/Servicos/ServicoReservas.cs
+@@ -1,5 +1,4 @@
+ using RrpReservas.Dominio.Entidades;
+-using RrpReservas.Dominio.Enums;
+ using RrpReservas.Dominio.Excecoes;
+ using RrpReservas.Dominio.ObjetosValor;
+ using RrpReservas.Dominio.Politicas;
+@@ -19,23 +18,9 @@ public class ServicoReservas
+ 
+     public Reserva Solicitar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
+     {
+-        // Problema proposital: regras por categoria estão codificadas diretamente no serviço.
+-        bool permitido;
++        var politica = _catalogo.Obter(usuario.Categoria);
+ 
+-        if (usuario.Categoria == CategoriaUsuario.Aluno)
+-        {
+-            permitido = periodo.Duracao <= TimeSpan.FromHours(2);
+-        }
+-        else if (usuario.Categoria == CategoriaUsuario.Professor)
+-        {
+-            permitido = periodo.Duracao <= TimeSpan.FromHours(4);
+-        }
+-        else
+-        {
+-            permitido = false;
+-        }
+-
+-        if (!permitido)
++        if (!politica.PodeReservar(usuario, recurso, periodo))
+         {
+             throw new RegraDeDominioException("A política atual não permite esta reserva.");
+         }

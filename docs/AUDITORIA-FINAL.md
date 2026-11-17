@@ -10,5 +10,5 @@ Marque `[x]` apenas depois de verificar o item.
 - [x] `ESPECIFICACAO-EVOLUCAO.md` está preenchido.
 - [x] `RASTREABILIDADE.csv` possui R01–R25 preenchidos.
 - [x] `REGISTRO-DEFEITOS.csv` possui BUG-01–BUG-04 preenchidos.
-- [ ] `ALTERACAO-FINAL.diff` foi gerado.
+- [x] `ALTERACAO-FINAL.diff` foi gerado.
 - [x] Nenhum diretório `bin` ou `obj` foi incluído no ZIP de entrega.
