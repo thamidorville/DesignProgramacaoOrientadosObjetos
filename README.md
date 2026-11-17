@@ -1,6 +1,8 @@
 # RRP — Sistema de Reservas de Recursos Acadêmicos
 
-Este repositório é o projeto-base do trabalho prático individual de recuperação em Design e Programação Orientada a Objetos.
+**Estudante:** Thamiris Dorville Martins
+
+Este repositório é o projeto do trabalho prático individual de recuperação em Design e Programação Orientada a Objetos.
 
 O sistema já compila e possui uma implementação inicial. Essa implementação é deliberadamente incompleta: existem violações de encapsulamento, regras de negócio ausentes, uma verificação de conflito incorreta, decisões de responsabilidade inadequadas e uma estratégia de variação que ainda precisa ser transformada em uma solução polimórfica.
 

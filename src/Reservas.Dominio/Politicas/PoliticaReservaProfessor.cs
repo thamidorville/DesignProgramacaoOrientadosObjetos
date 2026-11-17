@@ -10,7 +10,6 @@ public sealed class PoliticaReservaProfessor : IPoliticaReserva
 
     public bool PodeReservar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
     {
-        // Implementação propositalmente incompleta.
-        return usuario.Categoria == CategoriaUsuario.Professor;
+        return periodo.Duracao <= TimeSpan.FromHours(4);
     }
 }

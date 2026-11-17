@@ -1,20 +1,24 @@
+using RrpReservas.Dominio.Excecoes;
+
 namespace RrpReservas.Dominio.ObjetosValor;
 
 public class PeriodoReserva
 {
-    public DateTime Inicio { get; set; }
-    public DateTime Fim { get; set; }
+    public DateTime Inicio { get; }
+    public DateTime Fim { get; }
     public TimeSpan Duracao => Fim - Inicio;
 
     public PeriodoReserva(DateTime inicio, DateTime fim)
     {
+        if (inicio >= fim)
+            throw new RegraDeDominioException("O início do período deve ser anterior ao fim.");
+
         Inicio = inicio;
         Fim = fim;
     }
 
     public bool ConflitaCom(PeriodoReserva outro)
     {
-        // Implementação propositalmente incompleta: detecta apenas um dos casos de sobreposição.
-        return outro.Inicio >= Inicio && outro.Inicio < Fim;
+        return Inicio < outro.Fim && outro.Inicio < Fim;
     }
 }

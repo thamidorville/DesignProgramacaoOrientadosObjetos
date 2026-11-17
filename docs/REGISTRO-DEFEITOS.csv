@@ -1,5 +1,5 @@
 id,arquivo_causa,causa_encontrada,alteracao_realizada,teste_ou_verificacao
-BUG-01,,,,
-BUG-02,,,,
-BUG-03,,,,
-BUG-04,,,,
+BUG-01,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,"ConflitaCom só verificava outro.Inicio em relação ao período atual (outro.Inicio >= Inicio && outro.Inicio < Fim), ignorando sobreposições que começam antes do período atual","Substituída pela fórmula simétrica de sobreposição de intervalos: Inicio < outro.Fim && outro.Inicio < Fim","Teste PeriodoReservaTests.SobreposicaoPelaEsquerda_DeveConflitar passa; adjacentes continuam não conflitando"
+BUG-02,src/Reservas.Dominio/Entidades/Reserva.cs,"BloqueiaAgenda era Status != Cancelada, o que mantinha reservas Concluida como bloqueadoras da agenda","Passou a bloquear apenas quando Status é Solicitada ou Confirmada, de modo que Cancelada e Concluida não bloqueiam","Teste ReservaCancelada_NaoBloqueiaAgenda e lógica de TemConflito; reserva concluída deixa de impedir novo agendamento"
+BUG-03,src/Reservas.Dominio/Entidades/Reserva.cs,"Os métodos de transição (Confirmar/Cancelar/Concluir) atribuíam o Status sem verificar o estado atual, permitindo transições proibidas como Cancelada -> Confirmada","Cada método passou a validar o estado atual antes de mudar; transição inválida lança TransicaoDeReservaInvalidaException","Testes ReservaCancelada_NaoPodeSerConfirmada e ReservaConcluida_NaoPodeSerCancelada passam"
+BUG-04,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"A propriedade Reservas devolvia o próprio List interno (public List<Reserva> Reservas => _reservas), permitindo Add/Remove externos sem passar pelas regras da agenda","Propriedade passou a devolver _reservas.AsReadOnly() (ReadOnlyCollection), mantendo o List apenas como campo privado","Teste ColecaoExposta_NaoPodeSerUmaListMutavel passa (agenda.Reservas is List<Reserva> == false)"

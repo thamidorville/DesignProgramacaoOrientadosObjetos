@@ -22,10 +22,9 @@ public class CatalogoPoliticasReserva
 
     public IPoliticaReserva Obter(CategoriaUsuario categoria)
     {
-        // Implementação propositalmente incorreta: ignora a categoria solicitada.
-        if (_politicas.Count > 0)
+        if (_politicas.TryGetValue(categoria, out var politica))
         {
-            return _politicas.Values.First();
+            return politica;
         }
 
         throw new PoliticaReservaNaoEncontradaException($"Nenhuma política cadastrada para {categoria}.");

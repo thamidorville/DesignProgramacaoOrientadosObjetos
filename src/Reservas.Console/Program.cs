@@ -8,7 +8,8 @@ var agenda = new AgendaReservas();
 var catalogo = new CatalogoPoliticasReserva(new IPoliticaReserva[]
 {
     new PoliticaReservaAluno(),
-    new PoliticaReservaProfessor()
+    new PoliticaReservaProfessor(),
+    new PoliticaReservaVisitante()
 });
 var servico = new ServicoReservas(agenda, catalogo);
 

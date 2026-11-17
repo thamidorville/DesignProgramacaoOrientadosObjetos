@@ -1,26 +1,26 @@
 requisito,arquivo_ou_artefato,classe_metodo_ou_secao,teste_ou_verificacao
-R01,,, 
-R02,,, 
-R03,,, 
-R04,,, 
-R05,,, 
-R06,,, 
-R07,,, 
-R08,,, 
-R09,,, 
-R10,,, 
-R11,,, 
-R12,,, 
-R13,,, 
-R14,,, 
-R15,,, 
-R16,,, 
-R17,,, 
-R18,,, 
-R19,,, 
-R20,,, 
-R21,,, 
-R22,,, 
-R23,,, 
-R24,,, 
-R25,,, 
+R01,RrpReservas.sln,Solução completa (3 projetos net10.0),dotnet build RrpReservas.sln conclui com êxito
+R02,src/Reservas.Dominio/Entidades/Usuario.cs,Usuario (construtor + Id/Nome somente leitura),"Construtor rejeita Guid.Empty e nome vazio; Id e Nome sem setter público (verificação por reflexão)"
+R03,src/Reservas.Dominio/Entidades/Recurso.cs,Recurso (construtor + Id/Nome/Tipo somente leitura + EstaAtivo private set),"Construtor rejeita Guid.Empty e nome vazio; Id/Nome/Tipo sem setter público; EstaAtivo alterado apenas por Ativar()/Desativar()"
+R04,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,PeriodoReserva (construtor exige Inicio < Fim; Inicio/Fim somente leitura),"Construtor lança RegraDeDominioException quando inicio >= fim; testes InicioIgualAoFim_DeveFalhar e InicioDepoisDoFim_DeveFalhar"
+R05,src/Reservas.Dominio/ObjetosValor/PeriodoReserva.cs,PeriodoReserva.ConflitaCom,"Fórmula de sobreposição Inicio < outro.Fim && outro.Inicio < Fim; testes SobreposicaoPelaDireita/Esquerda_DeveConflitar e PeriodosAdjacentes_NaoDevemConflitar"
+R06,src/Reservas.Dominio/Entidades/Reserva.cs,Reserva (construtor exige usuario/recurso/periodo; nasce Solicitada; propriedades somente leitura / Status private set),"Construtor rejeita id vazio e argumentos nulos; Status inicial Solicitada; Usuario/Recurso/Periodo sem setter e Status sem setter público; teste NovaReserva_DeveComecarSolicitada"
+R07,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Confirmar/Cancelar/Concluir (transições válidas)","Transições Solicitada->Confirmada, Solicitada->Cancelada, Confirmada->Cancelada, Confirmada->Concluida; testes ReservaSolicitada_PodeSerConfirmada e ReservaConfirmada_PodeSerConcluida"
+R08,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Confirmar/Cancelar/Concluir (guardas de transição)","Transição não prevista lança TransicaoDeReservaInvalidaException; testes ReservaCancelada_NaoPodeSerConfirmada e ReservaConcluida_NaoPodeSerCancelada"
+R09,src/Reservas.Dominio/Servicos/AgendaReservas.cs,AgendaReservas.Reservas (exposta como IReadOnlyList via AsReadOnly),"Coleção interna continua List privada; propriedade pública devolve ReadOnlyCollection via _reservas.AsReadOnly(); teste ColecaoExposta_NaoPodeSerUmaListMutavel"
+R10,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"AgendaReservas.Adicionar + TemConflito","Adicionar lança ConflitoDeReservaException quando TemConflito detecta sobreposição com reserva bloqueadora do mesmo recurso; teste MesmoRecursoEmPeriodoConflitante_DeveSerRejeitado"
+R11,"src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Servicos/AgendaReservas.cs","Reserva.BloqueiaAgenda + AgendaReservas.TemConflito","Reservas Cancelada/Concluida não bloqueiam (BloqueiaAgenda); períodos adjacentes não conflitam; testes ReservaCancelada_NaoBloqueiaAgenda e PeriodosAdjacentes_NaoDevemConflitar"
+R12,src/Reservas.Dominio/Servicos/AgendaReservas.cs,"AgendaReservas.Adicionar (guarda recurso inativo)","Adicionar lança RegraDeDominioException quando reserva.Recurso.EstaAtivo é falso; teste RecursoInativo_NaoPodeReceberNovaReserva"
+R13,"src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Servicos/ServicoReservas.cs","Reserva.Status (private set) + comportamentos Confirmar/Cancelar/Concluir","Status tem apenas private set; ServicoReservas não atribui Status, apenas chama reserva.Confirmar(); inspeção estrutural"
+R14,src/Reservas.Dominio/Entidades/Reserva.cs,"Reserva.Periodo (composição obrigatória)","Periodo é somente leitura, exigido e validado no construtor (?? throw), não substituível externamente; representado como composição no MODELO-FINAL"
+R15,docs/MODELO-FINAL.md,"Diagrama de classes final (Mermaid) + leitura","Representa classes centrais, multiplicidades, composição Reserva*--PeriodoReserva, agregação da agenda e contrato IPoliticaReserva com as três políticas"
+R16,"src/Reservas.Dominio/Politicas/IPoliticaReserva.cs; src/Reservas.Dominio/Politicas/PoliticaReservaAluno.cs; src/Reservas.Dominio/Politicas/PoliticaReservaProfessor.cs","IPoliticaReserva + PoliticaReservaAluno/Professor","Aluno permite Duracao <= 2h, Professor <= 4h; testes Aluno_PodeReservarAteDuasHoras, Aluno_NaoPodeReservarMaisDeDuasHoras, Professor_NaoPodeReservarMaisDeQuatroHoras"
+R17,"src/Reservas.Dominio/Politicas/CatalogoPoliticasReserva.cs; src/Reservas.Dominio/Servicos/ServicoReservas.cs","CatalogoPoliticasReserva.Obter + ServicoReservas.Solicitar","Catalogo.Obter devolve a política da categoria via TryGetValue; Solicitar consulta o catálogo e executa PodeReservar, sem if/switch por categoria; teste PoliticaRegistradaPodeNegar..."
+R18,"src/Reservas.Dominio/Politicas/PoliticaReservaVisitante.cs; src/Reservas.Console/Program.cs","PoliticaReservaVisitante (IPoliticaReserva)","PodeReservar exige Duracao <= 1h, Tipo Sala ou Projetor e recurso ativo; registrada no catálogo sem alterar ServicoReservas (OCP)"
+R19,docs/ESPECIFICACAO-EVOLUCAO.md,"Especificação da evolução EV-01 (visitante)","Todas as seções do template preenchidas: necessidade, requisitos, regras, invariantes, critérios de aceitação (sucesso/rejeição), fora de escopo e elementos afetados"
+R20,docs/ALTERACAO-FINAL.diff,"Diff em relação à tag BASELINE-RRP","Arquivo gerado por git diff BASELINE-RRP..HEAD contendo as alterações do trabalho"
+R21,"src/Reservas.Dominio/Servicos/AgendaReservas.cs; src/Reservas.Dominio/Entidades/Reserva.cs; src/Reservas.Dominio/Excecoes/","Exceções específicas de domínio","Conflito usa ConflitoDeReservaException; transição inválida usa TransicaoDeReservaInvalidaException; violações gerais usam RegraDeDominioException (todas herdam de RegraDeDominioException)"
+R22,docs/RASTREABILIDADE.csv,"Matriz de rastreabilidade R01-R25","Este arquivo relaciona cada requisito ao arquivo/elemento e à verificação correspondente"
+R23,"docs/REGISTRO-DEFEITOS.csv; código do domínio","Correção dos quatro defeitos","BUG-01 (ConflitaCom), BUG-02 (BloqueiaAgenda), BUG-03 (transições), BUG-04 (coleção exposta) corrigidos e registrados no REGISTRO-DEFEITOS.csv"
+R24,tests/Reservas.Tests,"Suíte de testes públicos","dotnet test executa 19 testes, todos aprovados, sem regressões"
+R25,"docs/AUDITORIA-FINAL.md; docs/ENTREGA.md","Estrutura de entrega e auditoria final","AUDITORIA-FINAL.md preenchido item a item; estrutura do projeto conforme ENTREGA.md"

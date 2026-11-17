@@ -1,5 +1,4 @@
 using RrpReservas.Dominio.Entidades;
-using RrpReservas.Dominio.Enums;
 using RrpReservas.Dominio.Excecoes;
 using RrpReservas.Dominio.ObjetosValor;
 using RrpReservas.Dominio.Politicas;
@@ -19,23 +18,9 @@ public class ServicoReservas
 
     public Reserva Solicitar(Usuario usuario, Recurso recurso, PeriodoReserva periodo)
     {
-        // Problema proposital: regras por categoria estão codificadas diretamente no serviço.
-        bool permitido;
+        var politica = _catalogo.Obter(usuario.Categoria);
 
-        if (usuario.Categoria == CategoriaUsuario.Aluno)
-        {
-            permitido = periodo.Duracao <= TimeSpan.FromHours(2);
-        }
-        else if (usuario.Categoria == CategoriaUsuario.Professor)
-        {
-            permitido = periodo.Duracao <= TimeSpan.FromHours(4);
-        }
-        else
-        {
-            permitido = false;
-        }
-
-        if (!permitido)
+        if (!politica.PodeReservar(usuario, recurso, periodo))
         {
             throw new RegraDeDominioException("A política atual não permite esta reserva.");
         }

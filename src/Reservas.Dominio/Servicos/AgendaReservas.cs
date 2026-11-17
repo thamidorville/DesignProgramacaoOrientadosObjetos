@@ -1,4 +1,5 @@
 using RrpReservas.Dominio.Entidades;
+using RrpReservas.Dominio.Excecoes;
 using RrpReservas.Dominio.ObjetosValor;
 
 namespace RrpReservas.Dominio.Servicos;
@@ -7,8 +8,7 @@ public class AgendaReservas
 {
     private readonly List<Reserva> _reservas = new();
 
-    // Problema proposital: a coleção interna está exposta e pode ser alterada externamente.
-    public List<Reserva> Reservas => _reservas;
+    public IReadOnlyList<Reserva> Reservas => _reservas.AsReadOnly();
 
     public bool TemConflito(Recurso recurso, PeriodoReserva periodo, Guid? ignorarReservaId = null)
     {
@@ -21,7 +21,12 @@ public class AgendaReservas
 
     public void Adicionar(Reserva reserva)
     {
-        // Problema proposital: nenhuma regra é verificada aqui.
+        if (!reserva.Recurso.EstaAtivo)
+            throw new RegraDeDominioException("Um recurso inativo não pode receber reservas.");
+
+        if (TemConflito(reserva.Recurso, reserva.Periodo, reserva.Id))
+            throw new ConflitoDeReservaException("Já existe uma reserva em período conflitante para este recurso.");
+
         _reservas.Add(reserva);
     }
 }
